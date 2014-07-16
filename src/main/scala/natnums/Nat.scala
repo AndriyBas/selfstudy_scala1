@@ -20,26 +20,25 @@ object Zero extends Nat {
 
   override def +(that: Nat): Nat = that
 
-  override def -(that: Nat): Nat = throw new IllegalStateException("cannot subtract from Zero")
+  override def -(that: Nat): Nat =
+    if (that == Zero) Zero
+    else throw new IllegalStateException("cannot subtract from Zero")
 
   override def predecessor: Nat = throw new IllegalStateException("no predecessor of Zero")
 
   override def toString = "0"
 }
 
-class Succ(val n: Nat) extends Nat {
+class Succ(pred: Nat) extends Nat {
   override def isZero: Boolean = false
 
-
-  override def +(that: Nat): Nat =
-    if (that == Zero) this
-    else this.successor.+(that.predecessor)
+  override def +(that: Nat): Nat = new Succ(pred + that)
 
   override def -(that: Nat): Nat =
     if (that == Zero) this
-    else this.predecessor.-(that.predecessor)
+    else pred - that.predecessor
 
-  override def predecessor: Nat = this.n
+  override def predecessor: Nat = pred
 
   override def toString = predecessor.toString + "."
 }
