@@ -19,3 +19,4 @@ def isort(xs: List[Int]): List[Int] = xs match {
 }
 
 val s = isort(List(1, 5, 7, 2))
+
