@@ -22,7 +22,7 @@ class Nil[T] extends List[T] {
   override def toString = "."
 }
 
-def nth[T](n: Int, list: List[T]): T =
+def nth[T >: Int <: Any](n: Int, list: List[T]): T =
   if (list.isEmpty) throw new IndexOutOfBoundsException("empty list")
   else if (n == 0) list.head
   else nth(n - 1, list.tail)
@@ -31,6 +31,12 @@ def singleton[T](elem: T) = new Cons(elem, new Nil[T])
 
 val a1 = new Cons(1, new Cons(2, new Cons(3, new Nil)))
 
+object List {
+  def apply[T](x : T, y : T) : List[T] = new Cons(x, new Cons(y, new Nil))
+  true
+}
+
+def arr1 = List(1, 2)
 nth(2, a1)
 
 
