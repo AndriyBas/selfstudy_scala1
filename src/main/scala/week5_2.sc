@@ -16,3 +16,4 @@ def lengthFunLeft[T](xs : List[T]) : Int =
 lengthFunRight("1234".toList)
 lengthFunLeft("1234".toList)
 
+Nil ++ List(1, 2)
