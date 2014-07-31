@@ -4,7 +4,10 @@ package week5
  * Created by bamboo on 18.07.14.
  */
 object Main {
-
+  def main(args : Array[String]) {
+    val B\u0041\u0044 = 10
+    println(B\u0041\u0044)
+  }
 }
 
 object Week5 {
