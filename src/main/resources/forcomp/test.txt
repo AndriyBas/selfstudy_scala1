@@ -1,0 +1,9 @@
+a
+b
+ab
+ba
+an
+na
+bu
+ub
+lol

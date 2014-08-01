@@ -1,11 +1,9 @@
 package forcomp
 
-import org.scalatest.FunSuite
-
+import forcomp.Anagrams._
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-
-import Anagrams._
 
 @RunWith(classOf[JUnitRunner])
 class AnagramsSuite extends FunSuite {
@@ -49,6 +47,27 @@ class AnagramsSuite extends FunSuite {
     assert(subtract(lard, r) === lad)
   }
 
+  test("subtract: lard - rad") {
+    val lard = List(('a', 1), ('d', 1), ('l', 1), ('r', 1))
+    val rad = List(('a', 1), ('d', 1), ('r', 1))
+    val l = List(('l', 1))
+    assert(subtract(lard, rad) === l)
+  }
+
+  test("subtract: lard - ad") {
+    val lard = List(('a', 1), ('d', 1), ('l', 1), ('r', 1))
+    val r = List(('a', 1), ('d', 1))
+    val lr = List(('l', 1), ('r', 1))
+    assert(subtract(lard, r) === lr)
+  }
+
+  test("subtract: laaarrrd - aard") {
+    val laaarrd = List(('a', 3), ('d', 1), ('l', 1), ('r', 3))
+    val aard = List(('a', 2), ('r', 1), ('d', 1))
+    val larr = List(('l', 1), ('a', 1), ('r', 2))
+    assert(subtract(laaarrd, aard).toSet === larr.toSet)
+  }
+
 
 
   test("combinations: []") {
@@ -78,6 +97,12 @@ class AnagramsSuite extends FunSuite {
     assert(sentenceAnagrams(sentence) === List(Nil))
   }
 
+  test("sen anams : [an bu]") {
+    val sen = List("a", "b")
+    val t = sentenceAnagrams(sen)
+
+  }
+
   test("sentence anagrams: Linux rulez") {
     val sentence = List("Linux", "rulez")
     val anas = List(
@@ -103,6 +128,6 @@ class AnagramsSuite extends FunSuite {
       List("Linux", "rulez")
     )
     assert(sentenceAnagrams(sentence).toSet === anas.toSet)
-  }  
+  }
 
 }
