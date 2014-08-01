@@ -44,6 +44,15 @@ class BloxorzSuite extends FunSuite {
     }
   }
 
+  test("terrain function level 1 _ 2") {
+    new Level1 {
+      assert(!terrain(Pos(0, 9)), "0,9")
+      assert(!terrain(Pos(5, 0)), "5,0")
+      assert(!terrain(Pos(4, 3)), "4,3")
+      assert(terrain(Pos(4, 3)), "4,8")
+    }
+  }
+
   test("findChar level 1") {
     new Level1 {
       assert(startPos == Pos(1, 1))
@@ -55,15 +64,36 @@ class BloxorzSuite extends FunSuite {
       val res = neighborsWithHistory(Block(Pos(1, 1), Pos(1, 1)), List(Left, Up))
 
       val correctRes = Set(
-        (Block(Pos(1,2),Pos(1,3)), List(Right,Left,Up)),
-        (Block(Pos(2,1),Pos(3,1)), List(Down,Left,Up))
+        (Block(Pos(1, 2), Pos(1, 3)), List(Right, Left, Up)),
+        (Block(Pos(2, 1), Pos(3, 1)), List(Down, Left, Up))
       )
       assert(res.toSet === correctRes, "neighbours are not the same")
     }
   }
 
+  test("newNeighboursOnly ex") {
+    new Level1 {
+      val res = newNeighborsOnly(
+        Set(
+          (Block(Pos(1, 2), Pos(1, 3)), List(Right, Left, Up)),
+          (Block(Pos(2, 1), Pos(3, 1)), List(Down, Left, Up))
+        ).toStream,
+
+        Set(Block(Pos(1, 2), Pos(1, 3)), Block(Pos(1, 1), Pos(1, 1)))
+      )
+
+      val correctRes = Set(
+        (Block(Pos(2, 1), Pos(3, 1)), List(Down, Left, Up))
+      )
+      assert(res.toSet === correctRes, "wtf ololo")
+    }
+  }
+
+
   test("optimal solution for level 1") {
     new Level1 {
+      val pFromStart = pathsFromStart
+      val sol = solution
       assert(solve(solution) == Block(goal, goal))
     }
   }

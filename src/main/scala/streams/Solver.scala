@@ -10,7 +10,7 @@ trait Solver extends GameDef {
    */
   def done(b: Block): Boolean = {
     val curr = b.b1
-    b.isStanding && (curr.x == goal.x) && (curr.y == goal.y)
+    (b.isStanding && (curr.x == goal.x) && (curr.y == goal.y))
   }
 
   /**
@@ -36,9 +36,8 @@ trait Solver extends GameDef {
     //      (block._1, block._2 :: history)
 
     // apply foldLeft to all legal neighbours of current block
-    val foldFunc = b.legalNeighbors.foldLeft[Stream[(Block, List[Move])]](Stream.empty) _
+    b.legalNeighbors.foldLeft[Stream[(Block, List[Move])]](Stream.empty)((stream, el) => (el._1, el._2 :: history) #:: stream)
     // and yield correct new element to the stream
-    foldFunc((stream, block) => (block._1, block._2 :: history) #:: stream)
   }
 
 
@@ -48,7 +47,18 @@ trait Solver extends GameDef {
    * make sure that we don't explore circular paths.
    */
   def newNeighborsOnly(neighbors: Stream[(Block, List[Move])],
-                       explored: Set[Block]): Stream[(Block, List[Move])] = ???
+                       explored: Set[Block]): Stream[(Block, List[Move])] = {
+    def loop(stream: Stream[(Block, List[Move])], acc: Stream[(Block, List[Move])]): Stream[(Block, List[Move])] =
+      if (stream.isEmpty) acc
+      else {
+        val (b, path) = stream.head
+        if (explored.contains(b)) loop(stream.tail, acc)
+        else loop(stream.tail, stream.head #:: acc)
+      }
+    loop(neighbors, Stream.empty)
+    //    neighbors.filter(state => !explored.contains(state._1))
+  }
+
 
   /**
    * The function `from` returns the stream of all possible paths
@@ -74,18 +84,69 @@ trait Solver extends GameDef {
    * construct the correctly sorted stream.
    */
   def from(initial: Stream[(Block, List[Move])],
-           explored: Set[Block]): Stream[(Block, List[Move])] = ???
+           explored: Set[Block]): Stream[(Block, List[Move])] = {
+
+    def updateExploredSet(newStream: Stream[(Block, List[Move])], explored: Set[Block]): Set[Block] = {
+      newStream.foldLeft[Set[Block]](explored)((set, el) => set + el._1)
+    }
+
+    def loop(initial: Stream[(Block, List[Move])],
+             explored: Set[Block],
+             acc: Stream[(Block, List[Move])]): Stream[(Block, List[Move])] =
+      if (initial.isEmpty) acc
+      else {
+        val (block, path) = initial.head
+        val neigh = neighborsWithHistory(block, path)
+        val newNeigh = newNeighborsOnly(neigh, explored)
+        val newSet = updateExploredSet(newNeigh, explored)
+        loop(initial.tail, newSet, acc ++ newNeigh)
+      }
+
+
+    loop(initial, explored, Stream.empty)
+    //    def iter(el: (Block, List[Move])) = {
+    //      val (block, path) = el
+    //      newNeighborsOnly(neighborsWithHistory(block, path), explored)
+    //    }
+    // TODO : check if this elements of the stream are sorted by length of path : List[Move]
+    //    initial.foldLeft[Stream[(Block, List[Move])]](Stream.empty)((stream, el) => stream ++ iter(el))
+  }
 
   /**
    * The stream of all paths that begin at the starting block.
    */
-  lazy val pathsFromStart: Stream[(Block, List[Move])] = ???
+  lazy val pathsFromStart: Stream[(Block, List[Move])] = {
+    def updateExploredSet(newStream: Stream[(Block, List[Move])], explored: Set[Block]): Set[Block] = {
+      newStream.foldLeft[Set[Block]](explored)((set, el) => set + el._1)
+    }
+
+    def iter(curr: Stream[(Block, List[Move])], explored: Set[Block]): Stream[(Block, List[Move])] = {
+      val newStream = from(curr, explored)
+      val newSet = updateExploredSet(newStream, explored)
+      if (newSet == explored) curr
+      else iter(newStream, newSet)
+    }
+
+    iter((startBlock, List()) #:: Stream.empty, Set(startBlock))
+  }
 
   /**
    * Returns a stream of all possible pairs of the goal block along
    * with the history how it was reached.
    */
-  lazy val pathsToGoal: Stream[(Block, List[Move])] = ???
+  lazy val pathsToGoal: Stream[(Block, List[Move])] = {
+
+    def loop(stream: Stream[(Block, List[Move])], acc: Stream[(Block, List[Move])]): Stream[(Block, List[Move])] =
+      if (stream.isEmpty) acc
+      else {
+        val (b, path) = stream.head
+        if (done(b)) loop(stream.tail, stream.head #:: acc)
+        else loop(stream.tail, acc)
+      }
+    loop(pathsFromStart, Stream.empty)
+
+    //    pathsFromStart.filter((el) => done(el._1))
+  }
 
   /**
    * The (or one of the) shortest sequence(s) of moves to reach the
@@ -95,5 +156,7 @@ trait Solver extends GameDef {
    * the first move that the player should perform from the starting
    * position.
    */
-  lazy val solution: List[Move] = ???
+  lazy val solution: List[Move] =
+    if (pathsToGoal.isEmpty) List()
+    else pathsToGoal.head._2
 }
