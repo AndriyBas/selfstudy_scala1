@@ -36,7 +36,7 @@ trait Solver extends GameDef {
     //      (block._1, block._2 :: history)
 
     // apply foldLeft to all legal neighbours of current block
-    b.legalNeighbors.foldLeft[Stream[(Block, List[Move])]](Stream.empty)((stream, el) => (el._1, el._2 :: history) #:: stream)
+    b.legalNeighbors.foldLeft[Stream[(Block, List[Move])]](Stream.empty) { case (stream, (block, move)) => (block, move :: history) #:: stream}
     // and yield correct new element to the stream
   }
 
@@ -48,6 +48,7 @@ trait Solver extends GameDef {
    */
   def newNeighborsOnly(neighbors: Stream[(Block, List[Move])],
                        explored: Set[Block]): Stream[(Block, List[Move])] = {
+    @Deprecated // used for testing
     def loop(stream: Stream[(Block, List[Move])], acc: Stream[(Block, List[Move])]): Stream[(Block, List[Move])] =
       if (stream.isEmpty) acc
       else {
@@ -55,8 +56,9 @@ trait Solver extends GameDef {
         if (explored.contains(b)) loop(stream.tail, acc)
         else loop(stream.tail, stream.head #:: acc)
       }
-    loop(neighbors, Stream.empty)
-    //    neighbors.filter(state => !explored.contains(state._1))
+    //    loop(neighbors, Stream.empty)
+
+    neighbors.filter(state => !explored.contains(state._1))
   }
 
 
@@ -151,7 +153,7 @@ trait Solver extends GameDef {
    * with the history how it was reached.
    */
   lazy val pathsToGoal: Stream[(Block, List[Move])] = {
-
+    @Deprecated // used for testing
     def loop(stream: Stream[(Block, List[Move])], acc: Stream[(Block, List[Move])]): Stream[(Block, List[Move])] =
       if (stream.isEmpty) acc
       else {

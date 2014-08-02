@@ -80,3 +80,6 @@ import forcomp.Anagrams._
 val sentence = List("Linux", "rulez")
 
 sentenceAnagrams(List("Yes", "man"))
+
+val t = List("ab", "ad", "re", "bb")
+t groupBy( _(0))
